@@ -1,0 +1,50 @@
+ GET _analyze
+{
+    "text": "Nodes and Shards",
+    "analyzer": "standard"
+}
+GET _analyze
+{
+  "analyzer": "standard",
+  "text":     "<b>Is</b> this <a href='/blogs'>clean</a> text?"
+}
+
+# search and return the count of html code for double quotes
+GET  blogs/_count
+{
+  "query": {
+    "match": {
+      "content": "quot"
+    }
+  }
+}
+
+DELETE blogs_test
+  
+# exam prep item
+PUT blogs_test
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "content_analyzer" : {
+          "filter": ["lowercase"], 
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard"
+        }
+      }
+    }
+  }
+}
+
+GET blogs_test/_settings
+
+GET blogs_test/_analyze
+{
+  "text": "<b>Is</b> this <a href='/blogs'>clean</a> text?",
+  "analyzer": "content_analyzer"
+
+}
+
+
+
