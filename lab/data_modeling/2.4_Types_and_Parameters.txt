@@ -1,0 +1,176 @@
+# deletes the index, only used if i screwed up the index settings/mappings
+DELETE blogs_fixed2
+
+# SETUP: create the blogs_fixed2 index with the below settings and mappings
+PUT blogs_fixed2
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "content_analyzer": {
+          "tokenizer": "standard",
+          "filter": ["lowercase"],
+          "char_filter": ["html_strip"]
+        }
+      }
+    }
+  },
+  # field mapping types. used to make indexing faster and optimized
+  "mappings": {
+    "properties": {
+		"authors": {
+		  "properties": {
+			"company": {
+			  "type": "text",
+			  "fields": {
+				"keyword": {
+				  "type": "keyword",
+				  "ignore_above": 256
+				}
+			  }
+			},
+			"first_name": {
+			  "type": "keyword"
+			},
+			"full_name": {
+			  "type": "text"
+			},
+			"job_title": {
+			  "type": "text",
+			  "fields": {
+				"keyword": {
+				  "type": "keyword",
+				  "ignore_above": 256
+				}
+			  }
+			},
+			"last_name": {
+			  "type": "keyword"
+			},
+			"uid": {
+			  "type": "keyword"
+			}
+		  }
+		},
+		"category": {
+		  "type": "keyword"
+		},
+		"content": {
+		  "type": "text"
+		},
+		"locale": {
+		  "type": "keyword"
+		},
+		"publish_date": {
+		  "type": "date",
+		  "format": "iso8601"
+		},
+		"search_tags": {
+		  "type": "keyword", 
+		  "doc_values": false # disables searching/aggregation against this field
+		},
+		"tags": {
+		  "properties": {
+			"elastic_stack": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			},
+			"industry": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			},
+			"level": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			},
+			"product": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			},
+			"tags": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			},
+			"topic": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			},
+			"use_case": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			},
+			"use_cases": {
+			  "type": "keyword",
+			  "copy_to": "search_tags"
+			}
+		  }
+		},
+		"title": {
+		  "type": "text"
+		},
+		"url": {
+		  "type": "keyword"
+		}
+	  }
+	}
+}
+
+# reindex data from blogs to blogs_fixed2
+POST _reindex
+{"source": {
+  "index": "blogs"
+},
+"dest": {
+"index": "blogs_fixed2"
+}
+
+}
+
+# search for html 'quot' in the content field which contains the body of the blog post
+GET blogs_fixed2/_search
+{
+  "query": {
+    "match": {
+      "content": "quot"
+    }
+  }
+} 
+
+# search for logstash in the combined tags field
+GET blogs_fixed2/_search
+{
+  "query": {
+    "match": {
+      "search_tags": "logstash"
+    }
+  }
+}
+
+
+# attempt an aggregation search against search_tags. This fails because we've disabled doc_values in the mapping
+GET blogs_fixed2/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_job_titles": {
+      "terms": {
+        "field": "search_tags",
+        "size": 10
+      }
+    }
+  }
+}
+
+# attempt an aggregation search against a disabled field. This fails because its disabled.
+GET blogs_fixed2/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_author_uids": {
+      "terms": {
+        "field": "authors.uid",
+        "size": 10
+      }
+    }
+  }
+}
