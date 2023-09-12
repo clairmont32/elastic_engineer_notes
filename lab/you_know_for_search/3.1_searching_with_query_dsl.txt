@@ -1,0 +1,80 @@
+GET blogs_fixed2/_search
+
+GET blogs_fixed2/_search?size=50
+GET blogs_fixed2/_search
+{
+  "_source": false,
+  "fields": [
+    "title"
+  ],
+  "size": 50,
+  "query": {
+    "math": {
+      "content": {
+        "operator": "and",
+        "query": "open source"
+      }
+    }
+  }
+}
+
+GET blogs_fixed2/_search
+{
+  "_source": false,
+  "fields": [
+    "title"
+  ],
+  "size": 50,
+  "query": {
+    "match_phrase": {
+      "content": {
+        "query": "open source"
+      }
+    }
+  }
+}
+
+#  EXAM PREP  #
+GET blogs_fixed2/_search
+{
+  "_source": [
+    "title",
+    "publish_date"
+  ],
+  "size": 5,
+  "sort": [
+    {
+      "publish_date": {
+        "order": "desc"
+      }
+    }
+  ],
+  "query": {
+    "match_phrase": {
+      "content": "open source"
+    }
+  }
+}
+
+
+GET blogs_fixed2/_search
+{
+  "_source": [
+    "title",
+    "publish_date"
+  ],
+  "size": 5,
+  "from": 5,
+  "sort": [
+    {
+      "publish_date": {
+        "order": "desc"
+      }
+    }
+  ],
+  "query": {
+    "match_phrase": {
+      "content": "open source"
+    }
+  }
+}
