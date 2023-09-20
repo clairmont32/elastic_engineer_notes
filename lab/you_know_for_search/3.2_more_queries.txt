@@ -1,0 +1,93 @@
+GET blogs_fixed2/_search
+{
+  "_source": [
+    "title",
+    "publish_date"
+  ],
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "publish_date": {
+              "gte": "2018-01-01",
+              "lte": "2018-12-31"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+
+GET blogs_fixed2/_search
+{
+  "query": {
+    "multi_match": {
+      "fields": [
+        "authors.full_name",
+        "content"
+      ],
+      "query": "shay banon"
+    }
+  }
+}
+
+#  EXAM PREP #
+GET blogs_fixed2/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "meetups",
+            "fields": [
+              "content",
+              "title"
+            ]
+          }
+        }
+      ],
+      "filter": [
+        {
+          "range": {
+            "publish_date": {
+              "gte": "now/d-3y"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET blogs_fixed2/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "match": {
+            "content": "logstash"
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "locale": "fr-fr"
+          }
+        }
+      ],
+      "must": [
+        {
+          "match": {
+            "content": "ingestion"
+          }
+        }
+      ]
+    }
+  }
+}
