@@ -1,0 +1,109 @@
+
+GET web_traffic/_search
+{
+  "size": 0, 
+  "aggs": {
+    "fastest_request": {
+      "min": {
+        "field": "runtime_ms"
+      }
+    }
+  }
+}
+
+GET web_traffic/_search
+{
+  "size": 0, 
+  "aggs": {
+    "avg_request": {
+      "stats_bucket": {
+        "field": "runtime_ms"
+      }
+    }
+  }
+}  
+
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "median_and_90": {
+      "percentile_ranks": {
+        "field": "runtime_ms",
+        "values": [500000]
+      }
+    }
+  }
+}
+
+
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "requests_per_code": {
+      "terms": {
+        "field": "http.response.status_code"
+      }
+    }
+  }
+  
+}
+
+GET web_traffic/_search
+{
+  "size": 0, 
+  "aggs": {
+    "requests_per_code_sorted": {
+      "terms": {
+        "field": "http.response.status_code",
+        "order": {
+          "_key": "asc"
+        }
+      }
+    }
+  }
+}
+
+
+
+GET web_traffic/_search
+{
+"size": 0, 
+  "aggs": {
+    "bytes_sent_distribution": {
+      "histogram": {
+        "field": "bytes_sent",
+        "interval": 10000,
+        "min_doc_count": 1000
+      }
+    }
+  }
+}
+
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "bytes_sent_by_week": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "calendar_interval":"week"
+      }
+    }
+  }
+}
+
+
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "requests_per_second": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "calendar_interval": "second"
+      }
+    }
+  }
+}
