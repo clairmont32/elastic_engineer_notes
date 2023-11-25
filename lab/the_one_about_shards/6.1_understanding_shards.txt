@@ -1,0 +1,22 @@
+GET _cat/nodes?v
+GET _cat/indices/web_traffic?v
+GET _cat/shards/web_traffic?v
+
+PUT test1 
+{
+"settings": {
+"number_of_shards": 2,
+"number_of_replicas": 3
+}
+}
+
+GET _cat/shards/test1?s=shard,prirep&v
+
+PUT test1/_settings 
+{
+  "number_of_replicas": 2
+}
+
+GET _cat/shards/test1?v&s=node,shard
+
+DELETE test1
