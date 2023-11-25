@@ -1,0 +1,52 @@
+PUT temp1 
+{
+  "settings": {
+    "number_of_shards": 4,
+    "number_of_replicas": 0,
+    "refresh_interval": "-1"
+  }
+}
+
+GET temp1/_settings
+
+GET _cat/shards/temp1?v
+
+# docker-compose -f /home/ubuntu/docker-compose.yml start node4
+
+GET _cat/nodes?v
+GET _cat/shards/temp1?v
+
+POST _reindex
+{
+  "source": {
+    "index": "web_traffic",
+    "query": {
+      "match": {
+        "user_agent.os.name.keyword": "Android"
+      }
+    }
+  },
+  "dest": {
+    "index": "temp1"
+  }
+}
+
+GET temp1/_count
+POST temp1/_refresh
+GET temp1/_count
+PUT temp1/_settings
+{
+  "refresh_interval": "1s"
+}
+
+PUT temp1/_settings
+{
+  "index.auto_expand_replicas": "0-all"
+}
+
+GET _cat/shards/temp1?v&h=index,shard,prirep,node&s=index,shard,prirep,node
+
+# docker-compose -f /home/ubuntu/docker-compose.yml stop node4
+GET _cat/shards/temp1?v&h=index,shard,prirep,node&s=index,shard,prirep,node
+
+DELETE temp1
