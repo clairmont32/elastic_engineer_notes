@@ -1,0 +1,68 @@
+PUT blogs_tmp
+{
+  "settings": {
+    "number_of_shards": 2,
+    "number_of_replicas": 0
+  }
+}
+
+POST _reindex
+{
+  "source": {
+"index": "blogs"
+  }, 
+  "dest": {
+    "index": "blogs_tmp"
+  }
+}
+
+GET blogs_tmp/_count
+
+GET _cat/shards/blogs_tmp?v
+
+GET blogs_tmp/_search?preference=_shards:0
+{
+  "size": 3, 
+  "query": {
+    "match": {
+      "content": "Agent"
+    }
+  },
+  "_source": ["_title"]
+}
+
+# "hits" : {
+#    "total" : {
+#      "value" : 185,
+#      "relation" : "eq"
+#    },
+#    "max_score" : 5.278173,
+
+GET blogs_tmp/_search?preference=_shards:1
+{
+  "size": 3, 
+  "query": {
+    "match": {
+      "content": "Agent"
+    }
+  },
+  "_source": ["_title"]
+}
+
+#hits" : {
+#    "total" : {
+#      "value" : 180,
+#      "relation" : "eq"
+#    },
+#    "max_score" : 5.2215424,
+
+GET blogs_tmp/_search
+{
+  "size": 3, 
+  "query": {
+    "match": {
+      "content": "Agent"
+    }
+  },
+  "_source": ["_title"]
+}
