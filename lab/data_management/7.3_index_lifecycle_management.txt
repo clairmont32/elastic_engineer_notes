@@ -1,0 +1,23 @@
+PUT _cluster/settings
+{
+  "persistent": {
+    "indices.lifecycle.poll_interval": "30s"
+  }
+}
+
+
+GET _ilm/policy/my-metrics-policy
+
+DELETE my_metrics-service.status-dev
+
+
+POST my_metrics-service.status-dev/_doc
+{
+  "@timestamp": "2023-11-25",
+  "status": "UP",
+  "message": "Service is running."
+}
+
+GET my_metrics-service.status-dev/_settings
+
+GET my_metrics-service.status-dev/_ilm/explain
