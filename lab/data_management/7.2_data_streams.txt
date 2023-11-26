@@ -1,0 +1,53 @@
+POST my_metrics-service.status-dev/_doc
+{
+  "@timestamp": "2021-07-04",
+  "status": "UP",
+  "message": "Service is running."
+}
+
+PUT _component_template/time-series-mappings
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "message": {
+          "type": "text"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "data_stream.type": {
+          "type": "constant_keyword"
+        }
+      }
+    }
+  }
+}
+
+GET my_metrics-service.status-dev/_mapping
+
+
+POST my_metrics-service.status-dev/_rollover/
+
+POST my_metrics-service.status-dev/_doc
+{
+  "@timestamp": "2021-07-05",
+  "status": "UP",
+  "message": "Service is running.",
+  "data_stream.type": "my_metrics"
+}
+
+POST my_metrics-service.status-dev/_rollover/
+
+GET my_metrics-service.status-dev/_search
+{
+  "query": {
+    "match": {
+      "data_stream.type" : "my_metrics"
+    }
+  }
+}
+
