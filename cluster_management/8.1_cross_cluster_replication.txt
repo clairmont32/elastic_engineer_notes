@@ -1,0 +1,39 @@
+GET cluster2:blogs/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET blogs,cluster2:blogs/_search
+{
+  "query": {
+    "match_phrase": {
+      "content":"kibana query language"
+    }
+  }
+}
+
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-getting-started-tutorial.html
+PUT _cluster/settings
+{
+  "persistent": {
+    "cluster": {
+      "remote": {
+        "leader": {
+          "seeds": [
+            "node5:9304"
+            ]
+        }
+      }
+    }
+  }
+}
+
+GET _remote/info
+
+PUT blogs/_ccr/follow?wait_for_active_shards=1
+{
+  "leader_index": "blogs",
+"remote_cluster": "cluster2"
+}
