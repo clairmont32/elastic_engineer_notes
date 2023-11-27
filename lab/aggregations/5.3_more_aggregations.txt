@@ -1,0 +1,116 @@
+GET blogs_fixed2/_search
+{
+  "_source": [
+    "title"
+  ],
+  "size": 0,
+  "query": {
+    "match": {
+      "content": "elasticsearch siem"
+    }
+  },
+  "aggs": {
+    "top_3": {
+      "top_hits": {
+        "size": 3
+      }
+    },
+    "top_categories": {
+      "terms": {
+        "field": "category_title.title",
+        "size": 5
+      }
+    }
+  }
+}
+
+# compare the results' level of detail between this and the following search. note significant_terms is more detailed
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_OS": {
+      "terms": {
+        "field": "user_agent.os.name.keyword",
+        "size": 5
+      },
+      "aggs": {
+        "top_urls": {
+          "terms": {
+            "field": "url.original",
+            "size": 3
+          }
+        }
+      }
+    }
+  }
+}
+
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_OS": {
+      "terms": {
+        "field": "user_agent.os.name.keyword",
+        "size": 5
+      },
+      "aggs": {
+        "top_urls": {
+          "significant_terms": {
+            "field": "url.original",
+            "size": 3
+          }
+        }
+      }
+    }
+  }
+}
+
+#hourly sum of bytes_sent
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "date_histo": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "calendar_interval": "hour"
+      }
+    },
+    "sum": {
+      "sum": {
+        "field": "bytes_sent"
+      }
+    }
+  }
+}
+  
+# Update the previous query to compute the moving average of the hourly sum. Use a window of 5 hours.
+# idk how you'd come up with this on your own unless you're realllly into querying aggs or truly know what you're doing
+GET web_traffic/_search
+{
+  "size": 0,
+  "aggs": {
+    "logs_by_hour": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "calendar_interval": "hour"
+      },
+      "aggs": {
+        "sum_bytes": {
+          "sum": {
+            "field": "bytes_sent"
+          }
+        },
+        "the_movfn": {
+          "moving_fn": {
+            "buckets_path": "sum_bytes",
+            "window": 5,
+            "script": "MovingFunctions.unweightedAvg(values)"
+          }
+        }
+      }
+    }
+  }
+}
