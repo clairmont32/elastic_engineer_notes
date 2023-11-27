@@ -1,0 +1,59 @@
+GET blogs_fixed2/_search
+{
+  "profile": true, 
+  "_source": [""],
+  "query": {
+    "function_score": {
+      "query": {
+        "match_all": {}
+      },
+      "script_score": {
+        "script": """
+          void slow() {
+            for (int x = 0; x < 10000; ++x) 
+              Math.log(x);
+          } 
+
+          for (int x = 0; x < 3; ++x) 
+            slow();
+        """
+      }
+    }
+  }
+}
+
+# default scoring, "boosting" not necessarily in title field. ^1.4 multiplies the scoring factor 1.4x to ensure those results show higher up
+GET blogs_fixed2/_search
+{
+  "_source": [
+    "title"
+  ],
+  "query": {
+    "multi_match": {
+      "query": "boosting",
+      "fields": [
+        "content",
+        "title^1.4"
+      ]
+    }
+  }
+}
+
+# use sum of score from both fields - Exam prep
+GET blogs_fixed2/_search
+{
+  "_source": [
+    "title"
+  ],
+  "query": {
+    "multi_match": {
+     "type": "most_fields", 
+      "query": "boosting",
+      "fields": [
+        "content",
+        "title"
+      ]
+    }
+  }
+}
+
