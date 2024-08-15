@@ -9,7 +9,7 @@ GET blogs_fixed2/_search
   ],
   "size": 50,
   "query": {
-    "math": {
+    "match": {
       "content": {
         "operator": "and",
         "query": "open source"
